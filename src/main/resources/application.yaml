@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: gtw-court-reservation
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: court-redirect
+              uri: http://localhost:8081/
+              predicates:
+                - Path=/courts/**,/courts
+
+            - id: users-redirect
+              uri: http://localhost:8082/
+              predicates:
+                - Path=/users/**,/users
+
