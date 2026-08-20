@@ -16,3 +16,16 @@ spring:
               predicates:
                 - Path=/users/**,/users
 
+security:
+  external-auth:
+    validation-url: http://localhost:8082/users/api/auth/validate-session
+    protected-paths:
+      - /courts/**
+      - /users/**
+    excluded-paths:
+      - /users/api/auth/login
+      - /users/api/auth/register
+      - /users/swagger-ui/**
+      - /users/v3/api-docs/**
+      - /courts/swagger-ui/**
+      - /courts/api-docs/**
