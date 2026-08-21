@@ -16,16 +16,27 @@ spring:
               predicates:
                 - Path=/users/**,/users
 
+            - id: reservations-redirect
+              uri: http://localhost:8083/
+              predicates:
+                - Path=/reservations/**,/reservations
+
 security:
   external-auth:
     validation-url: http://localhost:8082/users/api/auth/validate-session
     protected-paths:
       - /courts/**
       - /users/**
+      - /reservations/**
     excluded-paths:
       - /users/api/auth/login
       - /users/api/auth/register
       - /users/swagger-ui/**
       - /users/v3/api-docs/**
+      - /users/v3/api-docs/swagger-config
       - /courts/swagger-ui/**
       - /courts/api-docs/**
+      - /courts/api-docs/swagger-config
+      - /reservations/swagger-ui/**
+      - /reservations/v3/api-docs/**
+      - /reservations/v3/api-docs/swagger-config
