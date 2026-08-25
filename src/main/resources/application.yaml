@@ -6,6 +6,15 @@ spring:
       server:
         webmvc:
           routes:
+
+            - id: court-admin-redirect
+              uri: http://localhost:8081/
+              predicates:
+                - Path=/courts/**,/courts
+                - Method=POST,PUT,DELETE, PATCH
+              filters:
+                - AdminOnly
+
             - id: court-redirect
               uri: http://localhost:8081/
               predicates:
@@ -15,6 +24,22 @@ spring:
               uri: http://localhost:8082/
               predicates:
                 - Path=/users/**,/users
+
+            - id: reservations-create-redirect
+              uri: http://localhost:8083/
+              predicates:
+                - Path=/reservations/api/reservations
+                - Method=POST
+              filters:
+                - FinalUserOnly
+
+            - id: reservations-cancel-redirect
+              uri: http://localhost:8083/
+              predicates:
+                - Path=/reservations/api/reservations/*/cancel
+                - Method=PATCH
+              filters:
+                - ReservationsOwnership
 
             - id: reservations-redirect
               uri: http://localhost:8083/
@@ -40,7 +65,6 @@ security:
       - /reservations/swagger-ui/**
       - /reservations/v3/api-docs/**
       - /reservations/v3/api-docs/swagger-config
-
 cors:
   allowed-origins:
     - http://localhost:3000
