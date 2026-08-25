@@ -40,3 +40,7 @@ security:
       - /reservations/swagger-ui/**
       - /reservations/v3/api-docs/**
       - /reservations/v3/api-docs/swagger-config
+
+cors:
+  allowed-origins:
+    - http://localhost:3000
