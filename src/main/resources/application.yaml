@@ -46,6 +46,13 @@ spring:
               predicates:
                 - Path=/reservations/**,/reservations
 
+            - id: reports-redirect
+              uri: ${REPORT_SERVICE_URI:http://localhost:8084}/
+              predicates:
+                - Path=/reports/**,/reports
+              filters:
+                - AdminOnly
+
 security:
   external-auth:
     validation-url: ${AUTH_SERVICE_URI:http://localhost:8082}/users/api/auth/validate-session
@@ -53,6 +60,7 @@ security:
       - /courts/**
       - /users/**
       - /reservations/**
+      - /reports/**
     excluded-paths:
       - /users/api/auth/login
       - /users/api/auth/register
@@ -65,6 +73,9 @@ security:
       - /reservations/swagger-ui/**
       - /reservations/v3/api-docs/**
       - /reservations/v3/api-docs/swagger-config
+      - /reports/swagger-ui/**
+      - /reports/api-docs/**
+      - /reports/api-docs/swagger-config
 cors:
   allowed-origins:
     - ${SHELL_ORIGIN:http://localhost:3000}
