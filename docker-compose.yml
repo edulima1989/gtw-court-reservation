@@ -72,6 +72,21 @@ services:
     networks:
       - court-net
 
+  msa-reports:
+    build:
+      context: ../msa-court-reservation-reports
+    container_name: msa-reports
+    environment:
+      COURT_SERVICE_URI: http://msa-court:8081
+      RESERVATION_SERVICE_URI: http://msa-reservations:8083
+    ports:
+      - "8084:8084"
+    depends_on:
+      - msa-court
+      - msa-reservations
+    networks:
+      - court-net
+
   # ---------------- Gateway ----------------
   gateway:
     build:
@@ -81,6 +96,7 @@ services:
       COURT_SERVICE_URI: http://msa-court:8081
       AUTH_SERVICE_URI: http://msa-authentication:8082
       RESERVATION_SERVICE_URI: http://msa-reservations:8083
+      REPORT_SERVICE_URI: http://msa-reports:8084
       SHELL_ORIGIN: http://localhost:3000
     ports:
       - "8080:8080"
@@ -88,6 +104,7 @@ services:
       - msa-authentication
       - msa-court
       - msa-reservations
+      - msa-reports
     networks:
       - court-net
 
