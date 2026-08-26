@@ -8,7 +8,7 @@ spring:
           routes:
 
             - id: court-admin-redirect
-              uri: http://localhost:8081/
+              uri: ${COURT_SERVICE_URI:http://localhost:8081}/
               predicates:
                 - Path=/courts/**,/courts
                 - Method=POST,PUT,DELETE, PATCH
@@ -16,17 +16,17 @@ spring:
                 - AdminOnly
 
             - id: court-redirect
-              uri: http://localhost:8081/
+              uri: ${COURT_SERVICE_URI:http://localhost:8081}/
               predicates:
                 - Path=/courts/**,/courts
 
             - id: users-redirect
-              uri: http://localhost:8082/
+              uri: ${AUTH_SERVICE_URI:http://localhost:8082}/
               predicates:
                 - Path=/users/**,/users
 
             - id: reservations-create-redirect
-              uri: http://localhost:8083/
+              uri: ${RESERVATION_SERVICE_URI:http://localhost:8083}/
               predicates:
                 - Path=/reservations/api/reservations
                 - Method=POST
@@ -34,7 +34,7 @@ spring:
                 - FinalUserOnly
 
             - id: reservations-cancel-redirect
-              uri: http://localhost:8083/
+              uri: ${RESERVATION_SERVICE_URI:http://localhost:8083}/
               predicates:
                 - Path=/reservations/api/reservations/*/cancel
                 - Method=PATCH
@@ -42,13 +42,13 @@ spring:
                 - ReservationsOwnership
 
             - id: reservations-redirect
-              uri: http://localhost:8083/
+              uri: ${RESERVATION_SERVICE_URI:http://localhost:8083}/
               predicates:
                 - Path=/reservations/**,/reservations
 
 security:
   external-auth:
-    validation-url: http://localhost:8082/users/api/auth/validate-session
+    validation-url: ${AUTH_SERVICE_URI:http://localhost:8082}/users/api/auth/validate-session
     protected-paths:
       - /courts/**
       - /users/**
@@ -67,4 +67,4 @@ security:
       - /reservations/v3/api-docs/swagger-config
 cors:
   allowed-origins:
-    - http://localhost:3000
+    - ${SHELL_ORIGIN:http://localhost:3000}

@@ -1,0 +1,147 @@
+name: court-reservation
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: court-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mysecretpassword}
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - court-net
+
+  # ---------------- Microservices ----------------
+  msa-authentication:
+    build:
+      context: ../msa-court-reservation-authentication
+    container_name: msa-authentication
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usuarios_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-mysecretpassword}
+      JWT_SECRET: ${JWT_SECRET:-replace-this-64-byte-minimum-jwt-secret-before-production-use-2026-auth}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - court-net
+
+  msa-court:
+    build:
+      context: ../msa-court-reservation-court
+    container_name: msa-court
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/canchas_db
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-mysecretpassword}
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - court-net
+
+  msa-reservations:
+    build:
+      context: ../msa-court-reservation-reservations
+    container_name: msa-reservations
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/reservas_db
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-mysecretpassword}
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - court-net
+
+  # ---------------- Gateway ----------------
+  gateway:
+    build:
+      context: .
+    container_name: gtw-court-reservation
+    environment:
+      COURT_SERVICE_URI: http://msa-court:8081
+      AUTH_SERVICE_URI: http://msa-authentication:8082
+      RESERVATION_SERVICE_URI: http://msa-reservations:8083
+      SHELL_ORIGIN: http://localhost:3000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - msa-authentication
+      - msa-court
+      - msa-reservations
+    networks:
+      - court-net
+
+  # ---------------- Microfrontends ----------------
+  mf-shell:
+    build:
+      context: ../master_microfrontend_shell
+    container_name: mf-shell
+    ports:
+      - "3000:80"
+    depends_on:
+      - mf-reservas
+      - mf-admin
+      - mf-reportes
+      - gateway
+    networks:
+      - court-net
+
+  mf-reservas:
+    build:
+      context: ../master_microfrontend_reservas
+      args:
+        ASSET_PREFIX: ${RESERVAS_ASSET_PREFIX:-http://localhost:3001}
+    container_name: mf-reservas
+    ports:
+      - "3001:80"
+    networks:
+      - court-net
+
+  mf-admin:
+    build:
+      context: ../master_microfrontend_admin
+      args:
+        ASSET_PREFIX: ${ADMIN_ASSET_PREFIX:-http://localhost:3002}
+    container_name: mf-admin
+    ports:
+      - "3002:80"
+    networks:
+      - court-net
+
+  mf-reportes:
+    build:
+      context: ../master_microfrontend_reportes
+      args:
+        ASSET_PREFIX: ${REPORTES_ASSET_PREFIX:-http://localhost:3003}
+    container_name: mf-reportes
+    ports:
+      - "3003:80"
+    networks:
+      - court-net
+
+volumes:
+  postgres-data:
+
+networks:
+  court-net:
+    driver: bridge
