@@ -1,33 +1,37 @@
 # Court Reservation — Despliegue con Docker Compose
 
 Este repositorio contiene el **API Gateway** y el `docker-compose.yml` que levanta la plataforma completa:
-3 microservicios, el gateway, la app shell, 3 microfrontends y una base de datos PostgreSQL.
+4 microservicios, el gateway, la app shell, 3 microfrontends y una base de datos PostgreSQL.
 
 ---
 
 ## 1. Arquitectura
 
 ```
-                    ┌──────────────────────────────────────────┐
-Navegador ────────► │ mf-shell (3000)                          │
-                    │  ├─ mf-reservas (3001)   Module          │
-                    │  ├─ mf-admin (3002)      Federation      │
-                    │  └─ mf-reportes (3003)                   │
-                    └───────────────┬──────────────────────────┘
-                                    │ HTTP
-                                    ▼
-                         ┌──────────────────────┐
-                         │ gateway (8080)       │
-                         └───────┬──────┬───────┘
-                                 │      │
-        ┌────────────────────────┘      └───────────────┐
-        ▼                    ▼                          ▼
-  msa-court (8081)   msa-authentication (8082)   msa-reservations (8083)
-        │                    │                          │
-        └──────────────┬─────┴──────────────────────────┘
-                       ▼
-              postgres (5432)
-        canchas_db · usuarios_db · reservas_db
+                       ┌──────────────────────────────────────────┐
+Navegador ───────────► │ mf-shell (3000)                          │
+                       │  ├─ mf-reservas (3001)   Module          │
+                       │  ├─ mf-admin (3002)      Federation      │
+                       │  └─ mf-reportes (3003)                   │
+                       └────────────────────┬─────────────────────┘
+                                            │ HTTP
+                                            ▼
+                         ┌────────────────────────────────────────┐
+                         │              gateway (8080)            │
+                         └──┬────┬──────────────────────┬─────┬───┘
+                            │    │                      │     │
+     ┌──────────────────────┘    │                      │     └──────────────────┐
+     ▼                           ▼                      ▼                        ▼
+msa-court (8081)   msa-authentication (8082)   msa-reservations (8083)   msa-reports (8084)
+     │                           │                        │                    │
+     │                           │                        │        consume vía HTTP
+     │                           │                        │        canchas y reservas
+     │                           │                        │◄───────────────────┘
+     └────────────────────────┬──┴────────────────────────┘
+                              │
+                              ▼
+                      postgres (5432)
+                canchas_db · usuarios_db · reservas_db
 ```
 
 | Servicio | Contenedor | Puerto host | Descripción |
@@ -36,6 +40,7 @@ Navegador ────────► │ mf-shell (3000)                       
 | Autenticación | `msa-authentication` | 8082 | Usuarios, login, validación de sesión |
 | Canchas | `msa-court` | 8081 | Canchas y deportes |
 | Reservas | `msa-reservations` | 8083 | Reservas y cancelaciones |
+| Reportes | `msa-reports` | 8084 | Reportes agregados; sin base de datos propia, consume canchas y reservas por HTTP. Rutas restringidas a rol ADMIN |
 | Gateway | `gtw-court-reservation` | 8080 | Enrutamiento, CORS y filtros de seguridad |
 | Shell | `mf-shell` | 3000 | Aplicación contenedora (host de microfrontends) |
 | Reservas MF | `mf-reservas` | 3001 | Microfrontend remoto |
@@ -48,7 +53,7 @@ Navegador ────────► │ mf-shell (3000)                       
 
 - **Docker Desktop 4.x** (o Docker Engine 24+) con **Docker Compose v2**.
 - **Git**.
-- Puertos libres en el host: `3000`, `3001`, `3002`, `3003`, `5432`, `8080`, `8081`, `8082`, `8083`.
+- Puertos libres en el host: `3000`, `3001`, `3002`, `3003`, `5432`, `8080`, `8081`, `8082`, `8083`, `8084`.
 - ~8 GB de RAM disponibles y ~5 GB de disco para las imágenes.
 
 > No se requiere instalar Java, Gradle ni Node en la máquina: todo se compila dentro de los contenedores.
@@ -66,6 +71,7 @@ proyectos deben estar clonados dentro de la misma carpeta padre:
 ├── msa-court-reservation-authentication/
 ├── msa-court-reservation-court/
 ├── msa-court-reservation-reservations/
+├── msa-court-reservation-reports/
 ├── master_microfrontend_shell/
 ├── master_microfrontend_reservas/
 ├── master_microfrontend_admin/
@@ -81,6 +87,7 @@ git clone <url>/gtw-court-reservation.git
 git clone <url>/msa-court-reservation-authentication.git
 git clone <url>/msa-court-reservation-court.git
 git clone <url>/msa-court-reservation-reservations.git
+git clone <url>/msa-court-reservation-reports.git
 git clone <url>/master_microfrontend_shell.git
 git clone <url>/master_microfrontend_reservas.git
 git clone <url>/master_microfrontend_admin.git
@@ -132,7 +139,8 @@ Esto ejecuta, en orden:
    `docker/postgres/init-databases.sql`.
 4. **Arranque de los microservicios** una vez que el healthcheck de PostgreSQL pasa a *healthy*.
    Hibernate crea las tablas automáticamente (`ddl-auto: update`).
-5. **Arranque del gateway** y, por último, de los microfrontends y el shell.
+5. **Arranque de `msa-reports`**, que no usa base de datos y espera a `msa-court` y `msa-reservations`.
+6. **Arranque del gateway** y, por último, de los microfrontends y el shell.
 
 La primera ejecución descarga dependencias de Gradle y npm, por lo que tarda considerablemente más
 que las siguientes (las capas quedan en caché).
@@ -154,9 +162,10 @@ Con todos los contenedores en estado `Up`:
 |---|---|
 | Aplicación (shell) | http://localhost:3000 |
 | Gateway | http://localhost:8080 |
-| Swagger — Canchas | http://localhost:8081/courts/swagger-ui.html |
+| Swagger — Canchas | http://localhost:8081/courts/swagger-ui/index.html |
 | Swagger — Usuarios | http://localhost:8082/users/swagger-ui/index.html |
 | Swagger — Reservas | http://localhost:8083/reservations/swagger-ui/index.html |
+| Swagger — Reportes | http://localhost:8084/reports/swagger-ui/index.html |
 
 Comprobación rápida por consola:
 
@@ -221,7 +230,16 @@ curl -s http://localhost:3002/mf-manifest.json | grep publicPath
 
 **Los microservicios no arrancan y los logs muestran `Connection refused` hacia PostgreSQL**
 PostgreSQL aún no terminaba de inicializar. Compose ya espera al healthcheck; si ocurre,
-`docker compose restart msa-court msa-authentication msa-reservations`.
+`docker compose restart msa-court msa-authentication msa-reservations msa-reports`.
+
+**`msa-reports` devuelve errores o listas vacías**
+Este servicio no tiene base de datos: consume `msa-court` y `msa-reservations` por HTTP usando
+`COURT_SERVICE_URI` y `RESERVATION_SERVICE_URI`. Verifica que ambos estén `Up` y revisa los logs con
+`docker compose logs -f msa-reports`.
+
+**`403` al consultar `/reports/**` desde el gateway**
+Las rutas de reportes están protegidas con el filtro `AdminOnly`; usa un token de un usuario con rol
+`ADMIN`.
 
 **Las bases de datos no existen**
 El script de inicialización solo se ejecuta cuando el volumen está vacío. Recrea el volumen con
