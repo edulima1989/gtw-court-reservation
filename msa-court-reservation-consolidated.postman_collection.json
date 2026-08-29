@@ -1,0 +1,1384 @@
+{
+  "info": {
+    "_postman_id": "c1f2e3d4-5678-4a9b-bcde-f123456789ab",
+    "name": "Consolidado Microservicios Reserva Canchas (GTW & MSA)",
+    "description": "Colección consolidada de Postman para los microservicios del sistema de Reserva de Canchas:\n\n- **msa-court-reservation-authentication** (/users)\n- **msa-court-reservation-court** (/courts)\n- **msa-court-reservation-reservations** (/reservations)\n- **msa-court-reservation-reports** (/reports)\n\nLas peticiones están configuradas por defecto a través del API Gateway (`http://localhost:8080`), pero las variables pueden ajustarse para probar directamente cada microservicio.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "auth_url",
+      "value": "{{gateway_url}}/users",
+      "type": "string"
+    },
+    {
+      "key": "court_url",
+      "value": "{{gateway_url}}/courts",
+      "type": "string"
+    },
+    {
+      "key": "reservation_url",
+      "value": "{{gateway_url}}/reservations",
+      "type": "string"
+    },
+    {
+      "key": "reports_url",
+      "value": "{{gateway_url}}/reports",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@courtreservation.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "Admin123*",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "usuario.final@courtreservation.com",
+      "type": "string"
+    },
+    {
+      "key": "user_password",
+      "value": "Usuario123*",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "adminUserId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "sportId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "courtId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "scheduleId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "maintenanceBlockId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "reservationId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "fromDate",
+      "value": "2026-08-01",
+      "type": "string"
+    },
+    {
+      "key": "toDate",
+      "value": "2026-08-31",
+      "type": "string"
+    },
+    {
+      "key": "from",
+      "value": "2026-08-01",
+      "type": "string"
+    },
+    {
+      "key": "to",
+      "value": "2026-08-31",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Autenticación y Usuarios (msa-court-reservation-authentication)",
+      "description": "Endpoints para registro, login con credenciales predeterminadas (ADMIN y USUARIO_FINAL), validación de token y administración de usuarios.",
+      "item": [
+        {
+          "name": "Iniciar Sesión - ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.token) {",
+                  "        pm.collectionVariables.set('auth_token', res.token);",
+                  "        pm.collectionVariables.set('admin_token', res.token);",
+                  "    }",
+                  "    if (res.userId) {",
+                  "        pm.collectionVariables.set('adminUserId', res.userId.toString());",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userMail\": \"{{admin_email}}\",\n  \"userPassword\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/login",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Iniciar Sesión - USUARIO_FINAL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.token) {",
+                  "        pm.collectionVariables.set('auth_token', res.token);",
+                  "        pm.collectionVariables.set('user_token', res.token);",
+                  "    }",
+                  "    if (res.userId) {",
+                  "        pm.collectionVariables.set('userId', res.userId.toString());",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userMail\": \"{{user_email}}\",\n  \"userPassword\": \"{{user_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/login",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar Nuevo Usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.userId) {",
+                  "        pm.collectionVariables.set('userId', res.userId.toString());",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Nuevo Usuario Prueba\",\n  \"userMail\": \"nuevo.usuario@courtreservation.com\",\n  \"userPassword\": \"Password123*\",\n  \"userRole\": \"USUARIO_FINAL\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/register",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Validar Sesión (Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{auth_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/validate-session",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "validate-session"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar Todos los Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/api/auth/users",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "users"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/api/auth/users/{{userId}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Usuario Final Actualizado\",\n  \"userMail\": \"usuario.final@courtreservation.com\",\n  \"userPassword\": \"Usuario123*\",\n  \"userRole\": \"USUARIO_FINAL\"\n}"
+            },
+            "url": {
+              "raw": "{{auth_url}}/api/auth/users/{{userId}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cambiar Rol de Usuario",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/api/auth/users/{{userId}}/role?newRole=ADMIN",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "users",
+                "{{userId}}",
+                "role"
+              ],
+              "query": [
+                {
+                  "key": "newRole",
+                  "value": "ADMIN"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{auth_url}}/api/auth/users/{{userId}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "users",
+                "api",
+                "auth",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Canchas y Deportes (msa-court-reservation-court)",
+      "description": "Endpoints para la gestión de deportes, canchas, horarios y bloqueos de mantenimiento.",
+      "item": [
+        {
+          "name": "Deportes (Sports)",
+          "item": [
+            {
+              "name": "Listar Deportes",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/sports",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "sports"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener Deporte por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/sports/{{sportId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "sports",
+                    "{{sportId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear Deporte",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code es 201 Created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "if (pm.response.code === 201) {",
+                      "    var res = pm.response.json();",
+                      "    if (res.sportId) {",
+                      "        pm.collectionVariables.set('sportId', res.sportId.toString());",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sportName\": \"Fútbol\"\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/sports",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "sports"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar Deporte",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sportId\": {{sportId}},\n  \"sportName\": \"Fútbol 7\"\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/sports/{{sportId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "sports",
+                    "{{sportId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar Deporte",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/sports/{{sportId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "sports",
+                    "{{sportId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Canchas (Courts)",
+          "item": [
+            {
+              "name": "Listar Canchas",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/courts",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "courts"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Listar Canchas Disponibles por Fecha",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/courts?date={{fromDate}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "courts"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "{{fromDate}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener Cancha por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/courts/{{courtId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "courts",
+                    "{{courtId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear Cancha",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code es 201 Created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "if (pm.response.code === 201) {",
+                      "    var res = pm.response.json();",
+                      "    if (res.courtId) {",
+                      "        pm.collectionVariables.set('courtId', res.courtId.toString());",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courtName\": \"Cancha Sintética Principal\",\n  \"courtDescription\": \"Cancha reglamentaria con iluminación LED\",\n  \"courtCapacity\": 12,\n  \"courtSportId\": {{sportId}},\n  \"courtPrice\": 25.50\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/courts",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "courts"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar Cancha",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courtId\": {{courtId}},\n  \"courtName\": \"Cancha Sintética Principal VIP\",\n  \"courtDescription\": \"Cancha premium con vestidores\",\n  \"courtCapacity\": 14,\n  \"courtSportId\": {{sportId}},\n  \"courtPrice\": 30.00,\n  \"courtActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/courts/{{courtId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "courts",
+                    "{{courtId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Activar / Inactivar Cancha",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courtActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/courts/{{courtId}}/active",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "courts",
+                    "{{courtId}}",
+                    "active"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar Cancha",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/courts/{{courtId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "courts",
+                    "{{courtId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Horarios (Schedules)",
+          "item": [
+            {
+              "name": "Listar Horarios",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/schedules",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "schedules"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener Horario por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/schedules/{{scheduleId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "schedules",
+                    "{{scheduleId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear Horario",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code es 201 Created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "if (pm.response.code === 201) {",
+                      "    var res = pm.response.json();",
+                      "    if (res.scheduleId) {",
+                      "        pm.collectionVariables.set('scheduleId', res.scheduleId.toString());",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"scheduleDay\": \"LUNES\",\n  \"scheduleCourtId\": {{courtId}},\n  \"scheduleStart\": \"08:00:00\",\n  \"scheduleEnd\": \"22:00:00\"\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/schedules",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "schedules"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar Horario",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"scheduleId\": {{scheduleId}},\n  \"scheduleDay\": \"LUNES\",\n  \"scheduleCourtId\": {{courtId}},\n  \"scheduleStart\": \"09:00:00\",\n  \"scheduleEnd\": \"21:00:00\"\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/schedules/{{scheduleId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "schedules",
+                    "{{scheduleId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar Horario",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/schedules/{{scheduleId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "schedules",
+                    "{{scheduleId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bloqueos de Mantenimiento (Maintenance Blocks)",
+          "item": [
+            {
+              "name": "Listar Bloqueos de Mantenimiento",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/maintenance-blocks",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "maintenance-blocks"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Obtener Bloqueo de Mantenimiento por ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/maintenance-blocks/{{maintenanceBlockId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "maintenance-blocks",
+                    "{{maintenanceBlockId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Crear Bloqueo de Mantenimiento",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code es 201 Created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "if (pm.response.code === 201) {",
+                      "    var res = pm.response.json();",
+                      "    if (res.maintenanceBlockId) {",
+                      "        pm.collectionVariables.set('maintenanceBlockId', res.maintenanceBlockId.toString());",
+                      "    }",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"maintenanceBlockCourtId\": {{courtId}},\n  \"maintenanceBlockStartDate\": \"2026-09-10\",\n  \"maintenanceBlockEndDate\": \"2026-09-12\",\n  \"maintenanceBlockReason\": \"Mantenimiento preventivo de césped\"\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/maintenance-blocks",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "maintenance-blocks"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Actualizar Bloqueo de Mantenimiento",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"maintenanceBlockId\": {{maintenanceBlockId}},\n  \"maintenanceBlockCourtId\": {{courtId}},\n  \"maintenanceBlockStartDate\": \"2026-09-10\",\n  \"maintenanceBlockEndDate\": \"2026-09-13\",\n  \"maintenanceBlockReason\": \"Mantenimiento general de césped e iluminación\"\n}"
+                },
+                "url": {
+                  "raw": "{{court_url}}/api/maintenance-blocks/{{maintenanceBlockId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "maintenance-blocks",
+                    "{{maintenanceBlockId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Eliminar Bloqueo de Mantenimiento",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{court_url}}/api/maintenance-blocks/{{maintenanceBlockId}}",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "courts",
+                    "api",
+                    "maintenance-blocks",
+                    "{{maintenanceBlockId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Reservas (msa-court-reservation-reservations)",
+      "description": "Endpoints para la creación, búsqueda y cancelación de reservas de canchas.",
+      "item": [
+        {
+          "name": "Crear Reserva",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var res = pm.response.json();",
+                  "    if (res.reservationId) {",
+                  "        pm.collectionVariables.set('reservationId', res.reservationId.toString());",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationDate\": \"2026-08-31\",\n  \"reservationStartTime\": \"10:00:00\",\n  \"reservationEndTime\": \"11:00:00\",\n  \"reservationCourtId\": {{courtId}},\n  \"reservationUserId\": {{userId}}\n}"
+            },
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener Reserva por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations/{{reservationId}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations",
+                "{{reservationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar Reservas Activas por Fecha",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations/active?date={{fromDate}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations",
+                "active"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{fromDate}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar Todas las Reservas Activas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations/active/all",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations",
+                "active",
+                "all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar Reservas Activas por Usuario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations/active/user/{{userId}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations",
+                "active",
+                "user",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar Todas las Reservas Canceladas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations/canceled/all",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations",
+                "canceled",
+                "all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar Reservas Canceladas por Usuario",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations/canceled/user/{{userId}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations",
+                "canceled",
+                "user",
+                "{{userId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar Reservas (Filtros Múltiples)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations?reservationCourtId={{courtId}}&reservationDate={{fromDate}}&reservationUserId={{userId}}&reservationState=ACTIVA",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations"
+              ],
+              "query": [
+                {
+                  "key": "reservationCourtId",
+                  "value": "{{courtId}}"
+                },
+                {
+                  "key": "reservationDate",
+                  "value": "{{fromDate}}"
+                },
+                {
+                  "key": "reservationUserId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "reservationState",
+                  "value": "ACTIVA"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancelar Reserva",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{reservation_url}}/api/reservations/{{reservationId}}/cancel",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reservations",
+                "api",
+                "reservations",
+                "{{reservationId}}",
+                "cancel"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Reportes (msa-court-reservation-reports)",
+      "description": "Endpoints para consultar indicadores de uso y ocupación de canchas.",
+      "item": [
+        {
+          "name": "Consultar Reporte de Uso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const report = pm.response.json();",
+                  "pm.test('Estructura de respuesta de reporte válida', function () {",
+                  "    pm.expect(report.reservationsByCourt).to.be.an('array');",
+                  "    pm.expect(report.reservationsBySport).to.be.an('array');",
+                  "    pm.expect(report.occupancyByCourt).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reports_url}}/api/usage?from={{fromDate}}&to={{toDate}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reports",
+                "api",
+                "usage"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{fromDate}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{toDate}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reporte Rango Inválido (Prueba 400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code es 400 Bad Request', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{reports_url}}/api/usage?from={{toDate}}&to={{fromDate}}",
+              "host": [
+                "{{gateway_url}}"
+              ],
+              "path": [
+                "reports",
+                "api",
+                "usage"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "{{toDate}}"
+                },
+                {
+                  "key": "to",
+                  "value": "{{fromDate}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
